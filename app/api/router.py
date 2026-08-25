@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from sqlalchemy import text
 from app.db.session import AsyncSessionLocal
+from app.redis.client import redis_client
 
 router = APIRouter()
 
@@ -22,6 +23,13 @@ async def readiness_check():
 
     except Exception:
         dependencies["postgres"] = "unhealthy"
+
+    try:
+        await redis_client.ping()
+        dependencies["redis"] = "healthy"
+
+    except Exception:
+        dependencies["redis"] = "unhealthy"
 
     ready = all(
         status == "healthy"
