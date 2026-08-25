@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+sqlalchemy[asyncio]
+asyncpg
+alembic
+redis
+pydantic-settings
+pyjwt
+pwdlib[argon2]
+celery
+
+[dev]
+pytest
+pytest-asyncio
+httpx
+ruff
