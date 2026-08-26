@@ -12,6 +12,7 @@ dependencies = [
     "alembic",
     "redis",
     "pydantic-settings",
+    "pydantic[email]",
     "pyjwt",
     "pwdlib[argon2]",
     "celery",

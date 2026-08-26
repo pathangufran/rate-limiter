@@ -11,6 +11,13 @@ class Settings(BaseSettings):
 
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
+
+    api_key_prefix: str = "rl_live_"
+    api_key_cache_ttl_seconds: int = 300
+
+    admin_email: str | None = None
+    admin_password: str | None = None
 
     log_level: str = "INFO"
 
