@@ -1,16 +1,29 @@
-from dataclasses import dataclass
-from datetime import datetime
-from uuid import UUID
+from fastapi import APIRouter,Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.api.admin.schemas import (
+    LoginRequest,
+    LoginResponse,
+)
+from app.db.session import get_db
+from app.services.auth_service import AuthService
 
-@dataclass(frozen=True)
-class CurrentUser:
-    user_id: UUID
-    tenant_id: UUID
-    role: str
+router = APIRouter(
+    prefix="/api/v1/admin/auth",
+    tags=["Admin Authentication"],
+)
 
-@dataclass(frozen=True)
-class APIKeyIdentity:
-    api_key_id: UUID
-    tenant_id: UUID
-    user_id: UUID | None
-    expires_at: datetime | None
+@router.post("/login",response_model=LoginResponse,)
+async def login(
+    payload: LoginRequest,
+    session: AsyncSession = Depends(get_db),
+):
+    service = AuthService(session)
+    token = await service.login(
+        email=payload.email,
+        password=payload.password,
+    )
+
+    return LoginResponse(
+        access_token=token,
+        expires_in=30 * 60,
+    )
