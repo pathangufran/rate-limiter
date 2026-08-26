@@ -36,3 +36,7 @@ class User(TimestampMixin,Base):
         "Tenant",
         back_populates="users",
     )
+    api_keys = relationship(
+        "APIKey",
+        back_populates="user",
+    )
