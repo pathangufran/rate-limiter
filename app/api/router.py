@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from sqlalchemy import text
 from app.db.session import AsyncSessionLocal
 from app.redis.client import redis_client
+from app.api.admin.router import router as admin_router
 
 router = APIRouter()
 
@@ -40,3 +41,5 @@ async def readiness_check():
         "status":"ready" if ready else "not_ready",
         "dependencies": dependencies,
     }
+
+router.include_router(admin_router)

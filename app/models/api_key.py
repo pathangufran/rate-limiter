@@ -19,6 +19,12 @@ class APIKey(Base):
         nullable=False,
         index=True,
     )
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True,
+    )
     name: Mapped[str] = mapped_column(
         String(150),
         nullable=False,

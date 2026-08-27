@@ -19,17 +19,17 @@ class AuthService:
         )
         if not user:
             raise HTTPException(
-                status=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
             )
         if not user.is_active:
             raise HTTPException(
-                status=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
             )
         if not verify_password(password,user.password):
             raise HTTPException(
-                status=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
             )
 

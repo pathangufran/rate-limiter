@@ -4,11 +4,11 @@ from uuid import UUID
 from fastapi import HTTPException,status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.admin.api_keys import (
+from app.core.api_keys import (
     generate_api_key,
     hash_api_key
 )
-from app.api.admin.auth import APIKeyIdentity
+from app.core.auth import APIKeyIdentity
 from app.core.config import settings
 from app.models.api_key import APIKey
 from app.repositories.api_key_repository import (

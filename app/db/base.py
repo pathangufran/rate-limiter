@@ -3,13 +3,13 @@ from sqlalchemy.orm import DeclarativeBase
 class Base(DeclarativeBase):
     pass
 
-from app.models import (  # noqa: E402,F401
-    APIKey,
-    AuditLog,
-    Endpoint,
-    Plan,
-    RateLimitPolicy,
-    RateLimitRule,
-    Tenant,
+from app.models import (
+    api_key,
+    audit_log,
+    endpoint,
+    plan,
+    rate_limit_policy,
+    rate_limit_rule,
+    tenant,
     user,
 )
