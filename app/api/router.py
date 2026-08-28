@@ -3,6 +3,7 @@ from sqlalchemy import text
 from app.db.session import AsyncSessionLocal
 from app.redis.client import redis_client
 from app.api.admin.router import router as admin_router
+from app.api.public import router as public_router
 
 router = APIRouter()
 
@@ -43,3 +44,4 @@ async def readiness_check():
     }
 
 router.include_router(admin_router)
+router.include_router(public_router)

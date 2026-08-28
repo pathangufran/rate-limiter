@@ -81,6 +81,7 @@ class RateLimitRule(TimestampMixin, Base):
         Boolean,
         default=True,
         nullable=False,
+        index=True,
     )
     policy = relationship(
         "RateLimitPolicy",
@@ -90,3 +91,8 @@ class RateLimitRule(TimestampMixin, Base):
         "Endpoint",
         back_populates="rules",
     )
+
+    plan = relationship("Plan")
+    tenant = relationship("Tenant")
+    user = relationship("User")
+    api_key = relationship("APIKey")

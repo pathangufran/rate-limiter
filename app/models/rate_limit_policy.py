@@ -42,6 +42,7 @@ class RateLimitPolicy(TimestampMixin,Base):
         Boolean,
         default=True,
         nullable=False,
+        index=True,
     )
     rules = relationship(
         "RateLimitRule",
