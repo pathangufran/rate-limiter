@@ -47,7 +47,7 @@ async def list_rules(
 
 @router.get(
     "/{rule_id}",
-    respose_model=RuleResponse,
+    response_model=RuleResponse,
 )
 async def get_rule(
     rule_id: UUID,
