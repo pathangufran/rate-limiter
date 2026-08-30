@@ -7,6 +7,10 @@ from app.rate_limit.keys import build_identity_key
 from app.rate_limit.policy_mapper import to_policy_config
 from app.rate_limit.result import RateLimitResult
 from app.rate_limit.state import build_fixed_window_key
+from app.rate_limit.time import (
+    current_timestamp,
+    get_window_number,
+)
 
 class RateLimitEngine:
 
@@ -49,11 +53,15 @@ class RateLimitEngine:
                 ),
                 identity_type=identity_type,
             )
+
+            timestamp = current_timestamp()
+
             key = self._build_state_key(
                 algorithm_name=policy.algorithm.value,
                 rule_id=resolved_rule.rule.id,
                 identity_key=identity_key,
                 policy=policy,
+                timestamp=timestamp,
             )
             result = await algorithm.check(
                 redis=self.redis,
@@ -96,6 +104,7 @@ class RateLimitEngine:
         rule_id,
         identity_key: str,
         policy,
+        timestamp: int,
     ) -> str:
 
         if algorithm_name == "FIXED_WINDOW":
@@ -103,11 +112,16 @@ class RateLimitEngine:
                 raise ValueError(
                     "window_seconds is required"
                 )
+
+            window_number = get_window_number(
+                timestamp,
+                policy.window_seconds,
+            )
             
             return build_fixed_window_key(
                 rule_id=rule_id,
                 identity_key=identity_key,
-                window_number=0,
+                window_number=window_number,
             )
 
         return (
