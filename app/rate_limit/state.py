@@ -13,3 +13,15 @@ def build_fixed_window_key(
         f"{identity_key}"
         f"{window_number}"
     )
+
+def build_sliding_window_key(
+    *,
+    rule_id: UUID,
+    identity_key: str,
+) -> str:
+
+    return (
+        "rl:state:sw:"
+        f"{rule_id}:"
+        f"{identity_key}"
+    )
