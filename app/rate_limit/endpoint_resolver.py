@@ -15,7 +15,7 @@ class EndpointResolver:
         method: str,
         path: str,
     ):
-        endpoints = await self.repository.list()
+        endpoints = await self.repository.list_rules()
         for endpoint in endpoints:
             if not endpoint.is_active:
                 continue

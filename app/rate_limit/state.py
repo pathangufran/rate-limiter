@@ -25,3 +25,15 @@ def build_sliding_window_key(
         f"{rule_id}:"
         f"{identity_key}"
     )
+
+def build_token_bucket_key(
+    *,
+    rule_id: UUID,
+    identity_key: str,
+) -> str:
+
+    return (
+        "rl:state:tb:"
+        f"{rule_id}:"
+        f"{identity_key}"
+    )

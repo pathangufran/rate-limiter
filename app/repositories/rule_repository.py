@@ -37,7 +37,7 @@ class RuleRepository:
 
         return result.scalar_one_or_none()
 
-    async def list(self,) -> list[RateLimitRule]:
+    async def list_rules(self,) -> list[RateLimitRule]:
 
         result = await self.session.execute(
             select(RateLimitRule)
