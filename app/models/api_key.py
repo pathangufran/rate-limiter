@@ -1,7 +1,11 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Boolean,String,ForeignKey,DateTime
-from sqlalchemy.orm import Mapped,mapped_column,relationship
+from sqlalchemy import (
+    Boolean,String,ForeignKey,DateTime,Index,
+)
+from sqlalchemy.orm import (
+    Mapped,mapped_column,relationship,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from app.db.base import Base
 
@@ -68,4 +72,19 @@ class APIKey(Base):
     user = relationship(
         "User",
         back_populates="api_keys",
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_api_keys_tenant_id",
+            "tenant_id",
+        ),
+        Index(
+            "ix_api_keys_user_id",
+            "user_id",
+        ),
+        Index(
+            "ix_api_keys_active",
+            "is_active",
+        ),
     )
