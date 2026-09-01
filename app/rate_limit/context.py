@@ -5,10 +5,10 @@ from app.models.rate_limit_rule import RateLimitRule
 
 @dataclass(frozen=True)
 class RequestIdentity:
-    tenant_id: UUID
-    api_key_id: UUID | None
-    user_id: UUID | None
-    client_ip: str
+    tenant_id: UUID | None = None
+    api_key_id: UUID | None = None
+    user_id: UUID | None = None
+    client_ip: str | None = None
 
 @dataclass(frozen=True)
 class RateLimitRequest:
@@ -22,6 +22,9 @@ class ResolvedRule:
 
 @dataclass(frozen=True)
 class RateLimitContext:
+    method: str
+    path: str
+    enpoint: str | None
     identity: RequestIdentity
     request: RateLimitRequest
     endpoint_id: UUID | None

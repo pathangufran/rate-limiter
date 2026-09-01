@@ -3,6 +3,9 @@ from fastapi import FastAPI
 from app.api.router import router
 from app.core.config import settings
 from app.redis.client import redis_client
+from app.middleware.rate_limit import (
+    RateLimitMiddleware,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,3 +21,8 @@ app = FastAPI(
 )
 
 app.include_router(router)
+app.add_middleware(
+    RateLimitMiddleware,
+    rate_limit_engine="rate_limit_engine",
+    rule_resolver="rule_resolver",
+)
