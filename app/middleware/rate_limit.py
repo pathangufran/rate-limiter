@@ -10,6 +10,14 @@ from app.rate_limit.identity_builder import (
     build_request_identity,
 )
 from app.rate_limit.rule_resolver import RuleResolver
+from app.rate_limit.decision import (
+    get_effective_evaluation,
+    get_rejected_evaluation,
+)
+from app.rate_limit.http import (
+    build_rate_limit_headers,
+    build_rate_limit_response,
+)
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
 
@@ -91,29 +99,34 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         )
 
     @staticmethod
-    def _get_effective_evaluation(decision):
+    def _build_rejection_response(
+        decision,
+    ):
+        evaluation = (
+            get_rejected_evaluation(decision)
+        )
 
-        if not decision.evaluation:
-            return None
+        if evaluation is None:
+            return RuntimeError(
+                "Rejected decision has no "
+                "rejected evaluation"
+            )
 
-        return min(
-            decision.evaluations,
-            key=lambda evaluation: (
-                evaluation.result.remaining
+        return build_rate_limit_response(
+            rule_id=(
+                decision.rejected_rule_id
             ),
+            result=evaluation.result,
         )
 
     @staticmethod
-    def _add_rate_limit_headers(
+    def _add_success_headers(
         response,
         decision,
     ) -> None:
 
         evaluation = (
-            RateLimitMiddleware
-            ._get_effective_evaluation(
-                decision
-            )
+            get_effective_evaluation(decision)
         )
 
         if evaluation is None:
@@ -121,63 +134,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         result = evaluation.result
 
-        response.headers[
-            "X-RateLimit-Limit"
-        ] = str(result.limit)
-
-        response.headers[
-            "X-RateLimit-Remaining"
-        ] = str(result.remaining)
-
-        response.headers[
-            "X-RateLimit-Reset"
-        ] = str(result.reset_after)
-
-
-    @staticmethod
-    def _build_rate_limit_response(
-        decision,
-    ) -> JSONResponse:
-
-        response = JSONResponse(
-            status_code=429,
-            content={
-                "detail": "Rate limit exceeded",
-                "error": "rate_limit_exceeded",
-                "rule_id": (
-                    str(decision.rejected_rule_id)
-                    if decision.rejected_rule_id
-                    else None
-                ),
-            },
+        headers = build_rate_limit_headers(
+            limit=result.limit,
+            remaining=result.remaining,
+            reset_after=result.reset_after,
         )
 
-        evaluation = next(
-            (
-                evaluation
-                for evaluation in decision.evaluations
-                if evaluation.rule_id
-                == decision.rejected_rule_id
-            ),
-            None,
-        )
+        for name,value in headers.items():
 
-        if evaluation is not None:
-
-            result = evaluation.result
-
-            response.headers[
-                "X-RateLimit-Limit"
-            ] = str(result.limit)
-
-            response.headers[
-                "X-RateLimit-Remaining"
-            ] = str(result.remaining)
-
-            if result.retry_after is not None:
-
-                response.headers[
-                    "Retry-After"
-                ] = str(result.retry_after)
+            response.headers[name] = value
 
         return response
