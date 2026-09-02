@@ -18,6 +18,9 @@ from app.rate_limit.evaluation import (
 )
 from app.rate_limit.identity import IdentityResolver
 from app.rate_limit.policy import RateLimitPolicyConfig
+from app.rate_limit.exceptions import (
+    RateLimitError,     
+)
 
 class RateLimitEngine:
 
@@ -65,12 +68,17 @@ class RateLimitEngine:
                 algorithm=policy_config.algorithm,
                 clock=self.clock,
             )
-            result = await algorithm.check(
-                redis=self.redis,
-                rule_id=rule.id,
-                identity_key=identity_key,
-                policy=policy_config,
-            )
+            try:
+                result = await algorithm.check(
+                    redis=self.redis,
+                    rule_id=rule.id,
+                    identity_key=identity_key,
+                    policy=policy_config,
+                )
+
+            except RateLimitError:
+                raise
+
             evaluation = RuleEvaluationResult(
                 rule_id=rule.id,
                 scope=rule.scope,

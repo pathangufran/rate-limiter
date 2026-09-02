@@ -18,6 +18,10 @@ from app.rate_limit.http import (
     build_rate_limit_headers,
     build_rate_limit_response,
 )
+from app.rate_limit.exceptions import RateLimitError
+from app.rate_limit.failure import (
+    RateLimitFailurePolicy,
+)
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
 
@@ -27,11 +31,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         *,
         rate_limit_engine,
         rule_resolver: RuleResolver,
+        failure_policy: RateLimitFailurePolicy,
     ):
         super.__init__(app)
 
         self.rate_limit_engine = rate_limit_engine
         self.rule_resolver = rule_resolver
+        self.failure_policy = failure_policy
 
     async def dispatch(
         self,
@@ -61,12 +67,30 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             identity=identity,
             rules=rules,
         )
-
-        decision = (
-            await self.rate_limit_engine.check(
-                context
+        try:
+            decision = (
+                await self.rate_limit_engine.check(
+                    context
+                )
             )
-        )
+
+        except RateLimitError:
+            if self.failure_policy.should_allow():
+                return await call_next(request)
+
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "detail": (
+                        "Rate limiting service "
+                        "temporarily unavailable"
+                    ),
+                    "error": (
+                        "rate_limit_unavailable"
+                    ),
+                },
+            )
+
         if not decision.allowed:
             return self._build_rate_limit_response(
                 decision
