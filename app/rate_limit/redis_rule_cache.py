@@ -1,12 +1,16 @@
 import json
 from app.rate_limit.cache import RuleCache
+from app.rate_limit.cache_models import CachedRule
 
 class RedisRuleCache(RuleCache):
 
     def __init__(self,redis,):
         self.redis = redis
 
-    async def get(self,key: str):
+    async def get(
+        self,
+        key: str
+    ) -> list[CachedRule] | None:
 
         value = await self.redis.get(key)
 
@@ -16,18 +20,40 @@ class RedisRuleCache(RuleCache):
         if isinstance(value,bytes):
             value = value.decode("utf-8")
 
-        return json.loads(value)
+        payload = json.loads(value)
+        rules = payload.get("rules",[])
+
+        return [
+            CachedRule.from_dict(rule)
+            for rule in rules
+        ]
 
     async def set(
-        self,key: str,value,*,ttle: int,
+        self,
+        key: str,
+        rules:list[CachedRule],
+        value,
+        *,
+        ttl: int,
     ) -> None:
 
-        payload = json.dumps(
-            value,
-            separators=(",",":"),
+        payload = {
+            "rues": [
+                rule.to_dict()
+                for rule in rules
+            ]
+        }
+
+        serialized = json.dumps(
+            payload,
+            separators=(",", ":"),
         )
 
-        await self.redis.set(key,payload,ex=ttle,)
+        await self.redis.set(
+            key,
+            serialized,
+            ex=ttl,
+        )
 
     async def delete(self,key: str,) -> None:
 

@@ -1,15 +1,56 @@
+RULE_CACHE_NAMESPACE = (
+    "rate_limit:rules"
+)
+
+RULE_CACHE_VERSION = "v1"
+
+def normalize_endpoint(
+    endpoint: str,
+) -> str:
+    """
+    Normalize endpoint paths so equivalent
+    paths don't create different cache keys.
+    """
+    if not endpoint:
+        return "/"
+
+    if endpoint != "/":
+        endpoint = endpoint.rstrip("/")
+
+    return endpoint
+
+def normalize_method(
+    method: str,
+) -> str:
+    """
+    HTTP methods are case-insensitive for the
+    purpose of our cache key.
+    """
+
+    return method.upper()
+
 def build_rule_cache_key(
     *,
     tenant_id: int,
     method: str,
     endpoint: str,
+    identity_type: str,
     identity_id: str,
 ) -> str:
 
+    endpoint = normalize_endpoint(
+        endpoint
+    )
+    method = normalize_method(
+        method
+    )
+
     return (
-        "rate_limit:rules:"
+        f"{RULE_CACHE_NAMESPACE}:"
+        f"{RULE_CACHE_VERSION}:"
         f"tenant:{tenant_id}:"
-        f"method:{method.upper()}:"
+        f"method:{method}:"
         f"endpoint:{endpoint}:"
-        f"identity:{identity_id}"
+        f"identity:{identity_type}:"
+        f"{identity_id}"
     )

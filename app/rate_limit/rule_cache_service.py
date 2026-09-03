@@ -1,12 +1,16 @@
+from app.rate_limit.cache import RuleCache
 from app.rate_limit.cache_keys import (
     build_rule_cache_key,
+)
+from app.rate_limit.cache_models import (
+    CachedRule,
 )
 
 class RuleCacheService:
 
     def __init__(
         self,
-        cache,
+        cache: RuleCache,
         *,
         ttl: int = 60,
     ):
@@ -19,12 +23,15 @@ class RuleCacheService:
         tenant_id: int,
         method: str,
         endpoint: str,
+        identity_type: str,
         identity_id: str,
-    ):
+    ) -> list[CachedRule] | None:
+         
         key = build_rule_cache_key(
             tenant_id=tenant_id,
             method=method,
             endpoint=endpoint,
+            identity_type=identity_type,
             identity_id=identity_id,
         )
 
@@ -36,13 +43,16 @@ class RuleCacheService:
         tenant_id: int,
         method: str,
         endpoint: str,
+        identity_type: str,
         identity_id: str,
-        rules,
-    ):
+        rules: list[CachedRule],
+    ) -> None:
+        
         key = build_rule_cache_key(
             tenant_id=tenant_id,
             method=method,
             endpoint=endpoint,
+            identity_type=identity_type,
             identity_id=identity_id,
         )
 
@@ -58,12 +68,14 @@ class RuleCacheService:
         tenant_id: int,
         method: str,
         endpoint: str,
+        identity_type: str,
         identity_id: str,   
-    ):
+    ) -> None:
         key = build_rule_cache_key(
             tenant_id=tenant_id,
             method=method,
             endpoint=endpoint,
+            identity_type=identity_type,
             identity_id=identity_id,
         )
 
