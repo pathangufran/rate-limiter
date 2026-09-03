@@ -1,4 +1,7 @@
 from app.rate_limit.cache import RuleCache
+from app.rate_limit.cache_generation import (
+    RuleCacheGeneration,
+)
 from app.rate_limit.cache_keys import (
     build_rule_cache_key,
 )
@@ -11,10 +14,18 @@ class RuleCacheService:
     def __init__(
         self,
         cache: RuleCache,
+        generation: RuleCacheGeneration,
         *,
         ttl: int = 60,
     ):
+
+        if ttl <= 0:
+            raise ValueError(
+                "Cache TTL must be greater than zero"
+            )
+        
         self.cache = cache
+        self.generation = generation
         self.ttl = ttl
 
     async def get(
@@ -26,6 +37,12 @@ class RuleCacheService:
         identity_type: str,
         identity_id: str,
     ) -> list[CachedRule] | None:
+
+        generation = (
+            await self.generation.get(
+                tenant_id=tenant_id
+            )
+        )
          
         key = build_rule_cache_key(
             tenant_id=tenant_id,
@@ -47,6 +64,12 @@ class RuleCacheService:
         identity_id: str,
         rules: list[CachedRule],
     ) -> None:
+
+        generation = (
+            await self.generation.get(
+                tenant_id=tenant_id
+            )
+        )
         
         key = build_rule_cache_key(
             tenant_id=tenant_id,
@@ -80,3 +103,13 @@ class RuleCacheService:
         )
 
         await self.cache.delete(key)
+
+    async def invalidate_tenant(
+        self,
+        *,
+        tenant_id: int,
+    ) -> int:
+
+        return await self.generation.invalidate(
+            tenant_id=tenant_id
+        )

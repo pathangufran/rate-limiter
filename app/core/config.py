@@ -2,6 +2,9 @@ from functools import lru_cache
 from pydantic_settings import BaseSettings,SettingsConfigDict
 
 class Settings(BaseSettings):
+
+    RULE_CACHE_TTL_SECONDS: int = 60
+    
     app_name: str = "Distributed Rate Limiter"
     app_env: str = "development"
     debug: bool = False
