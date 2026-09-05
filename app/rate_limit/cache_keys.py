@@ -3,6 +3,7 @@ RULE_CACHE_NAMESPACE = (
 )
 
 RULE_CACHE_VERSION = "v1"
+RULE_CACHE_LOCK_NAMESPACE = "rate_limit:rule_cache_lock"
 
 def normalize_endpoint(
     endpoint: str,
@@ -65,4 +66,28 @@ def build_rule_generation_key(
     return (
         f"{RULE_CACHE_NAMESPACE}:"
         f"tenant:{tenant_id}"
+    )
+
+def build_rule_cache_lock_key(
+    *,
+    tenant_id: int,
+    generation: int,
+    method: str,
+    endpoint: str,
+    identity_type: str,
+    identity_id: str,
+) -> str:
+
+    endpoint = normalize_endpoint(endpoint)
+    method = normalize_method(method)
+
+    return (
+        f"{RULE_CACHE_LOCK_NAMESPACE}:"
+        f"{RULE_CACHE_VERSION}:"
+        f"tenant:{tenant_id}:"
+        f"generation:{generation}:"
+        f"method:{method}:"
+        f"endpoint:{endpoint}:"
+        f"identity:{identity_type}:"
+        f"{identity_id}"
     )
